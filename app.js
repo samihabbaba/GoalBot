@@ -70,7 +70,7 @@ app.message(/commands/i, async ({ message, say }) => {
 
   if (message.text === "commands") {
     await say(
-      `\`Commands\`\n*[leagues]*: Retrieve leagues's.\n*[today]*: Retrieve today's matches.\n*[tomorrow]*: Retrieve tomorrow's matches.\n*[this week]*: Retrieve this week's matches until monday.\n*[next week]*: Retrieve next week's matches next monday.`
+      `\`Commands\`\n*[leagues]*: Retrieve leagues's.\n*[today]*: Retrieve today's matches.\n*[tomorrow]*: Retrieve tomorrow's matches.\n*[this week]*: Retrieve this week's matches until monday.\n*[next week]*: Retrieve next week's matches until next monday.`
     );
   }
 });
@@ -102,70 +102,74 @@ app.message(/today/i, async ({ message, say }) => {
 
   if (message.text === "today") {
     const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
     const strToday = returnUTCString(today);
-    const dates = [];
+    let dates = [];
+    const replyArr = [];
 
     for (let country in allLeagues) {
+      dates = [];
+
       allLeagues[country].forEach((x) => {
         dates.push(
           axios.get(`https://v3.football.api-sports.io/fixtures`, {
             headers: { "x-apisports-key": API_KEY },
-            params: { season: currentSeason, league: x.id, date: strToday },
+            params: {
+              season: currentSeason,
+              league: x.id,
+              date: strToday,
+              timezone: "Europe/Istanbul",
+            },
           })
         );
       });
+
+      await Promise.all(dates)
+        .then(
+          axios.spread(async (...responses) => {
+            responses.forEach((x) => {
+              const response = x.data.response;
+              response.sort(sortByDate);
+              if (response.length > 0) {
+                if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
+                  replyArr.push(`\`${response[0].league.country}\`\n`);
+                }
+                replyArr.push(`\• *${response[0].league.name}*\n`);
+                response.forEach((game) => {
+                  if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
+                    replyArr.push(`\`${game.league.country}\`\n`);
+                  }
+                  replyArr.push(
+                    `${convertToDateString(game.fixture.timestamp)}${
+                      game.teams.home.name
+                    } vs ${game.teams.away.name}${
+                      game.goals.home || game.goals.home === 0
+                        ? ` (${game.goals.home}-${game.goals.away})`
+                        : ""
+                    }\n`
+                  );
+                });
+              }
+            });
+          })
+        )
+        .catch(async (errors) => {
+          await say("Something went wrong with the football api.");
+        });
     }
 
-    axios
-      .all(dates)
-      .then(
-        axios.spread(async (...responses) => {
-          const replyArr = [];
-          const leagueIds = [];
-
-          responses.forEach((x) => {
-            const response = x.data.response;
-            response.sort(sortByDate);
-            if (response.length > 0) {
-              if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
-                replyArr.push(`\`${response[0].league.country}\`\n`);
-              }
-              replyArr.push(`\• *${response[0].league.name}*\n`);
-              response.forEach((game) => {
-                if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
-                  replyArr.push(`\`${game.league.country}\`\n`);
-                }
-                replyArr.push(
-                  `${convertToDateString(game.fixture.timestamp)}${
-                    game.teams.home.name
-                  } vs ${game.teams.away.name}${
-                    game.goals.home || game.goals.home === 0
-                      ? ` (${game.goals.home}-${game.goals.away})`
-                      : ""
-                  }\n`
-                );
-              });
-            }
-          });
-
-          if (replyArr.length > 0) {
-            await say(replyArr.join(""));
-          } else {
-            await say("There is no matches on this day.");
-          }
-        })
-      )
-      .catch(async (errors) => {
-        await say("Something went wrong with the football api.");
-      });
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
   } else if (
     arr.length === 2 &&
     allLeagues[arr[0]] &&
     arr[1].toLowerCase() === "today"
   ) {
     const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
     const strToday = returnUTCString(today);
     const dates = [];
 
@@ -173,7 +177,12 @@ app.message(/today/i, async ({ message, say }) => {
       dates.push(
         axios.get(`https://v3.football.api-sports.io/fixtures`, {
           headers: { "x-apisports-key": API_KEY },
-          params: { season: currentSeason, league: x.id, date: strToday },
+          params: {
+            season: currentSeason,
+            league: x.id,
+            date: strToday,
+            timezone: "Europe/Istanbul",
+          },
         })
       );
     });
@@ -222,74 +231,79 @@ app.message(/tomorrow/i, async ({ message, say }) => {
 
   if (message.text === "tomorrow") {
     const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
 
-    today.setDate(today.getDate() + 1);
+    today.setUTCDate(today.getUTCDate() + 1);
 
     const strToday = returnUTCString(today);
-    const dates = [];
+    let dates = [];
+    const replyArr = [];
 
     for (let country in allLeagues) {
+      dates = [];
+
       allLeagues[country].forEach((x) => {
         dates.push(
           axios.get(`https://v3.football.api-sports.io/fixtures`, {
             headers: { "x-apisports-key": API_KEY },
-            params: { season: currentSeason, league: x.id, date: strToday },
+            params: {
+              season: currentSeason,
+              league: x.id,
+              date: strToday,
+              timezone: "Europe/Istanbul",
+            },
           })
         );
       });
+
+      await Promise.all(dates)
+        .then(
+          axios.spread(async (...responses) => {
+            responses.forEach((x) => {
+              const response = x.data.response;
+              response.sort(sortByDate);
+              if (response.length > 0) {
+                if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
+                  replyArr.push(`\`${response[0].league.country}\`\n`);
+                }
+                replyArr.push(`\• *${response[0].league.name}*\n`);
+                response.forEach((game) => {
+                  if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
+                    replyArr.push(`\`${game.league.country}\`\n`);
+                  }
+                  replyArr.push(
+                    `${convertToDateString(game.fixture.timestamp)}${
+                      game.teams.home.name
+                    } vs ${game.teams.away.name}${
+                      game.goals.home || game.goals.home === 0
+                        ? ` (${game.goals.home}-${game.goals.away})`
+                        : ""
+                    }\n`
+                  );
+                });
+              }
+            });
+          })
+        )
+        .catch(async (errors) => {
+          await say("Something went wrong with the football api.");
+        });
     }
 
-    axios
-      .all(dates)
-      .then(
-        axios.spread(async (...responses) => {
-          const replyArr = [];
-
-          responses.forEach((x) => {
-            const response = x.data.response;
-            response.sort(sortByDate);
-            if (response.length > 0) {
-              if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
-                replyArr.push(`\`${response[0].league.country}\`\n`);
-              }
-              replyArr.push(`\• *${response[0].league.name}*\n`);
-              response.forEach((game) => {
-                if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
-                  replyArr.push(`\`${game.league.country}\`\n`);
-                }
-                replyArr.push(
-                  `${convertToDateString(game.fixture.timestamp)}${
-                    game.teams.home.name
-                  } vs ${game.teams.away.name}${
-                    game.goals.home || game.goals.home === 0
-                      ? ` (${game.goals.home}-${game.goals.away})`
-                      : ""
-                  }\n`
-                );
-              });
-            }
-          });
-
-          if (replyArr.length > 0) {
-            await say(replyArr.join(""));
-          } else {
-            await say("There is no matches on this day.");
-          }
-        })
-      )
-      .catch(async (errors) => {
-        await say("Something went wrong with the football api.");
-      });
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
   } else if (
     arr.length === 2 &&
     allLeagues[arr[0]] &&
     arr[1].toLowerCase() === "tomorrow"
   ) {
     const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
 
-    today.setDate(today.getDate() + 1);
+    today.setUTCDate(today.getUTCDate() + 1);
 
     const strToday = returnUTCString(today);
     const dates = [];
@@ -298,13 +312,17 @@ app.message(/tomorrow/i, async ({ message, say }) => {
       dates.push(
         axios.get(`https://v3.football.api-sports.io/fixtures`, {
           headers: { "x-apisports-key": API_KEY },
-          params: { season: currentSeason, league: x.id, date: strToday },
+          params: {
+            season: currentSeason,
+            league: x.id,
+            date: strToday,
+            timezone: "Europe/Istanbul",
+          },
         })
       );
     });
 
-    axios
-      .all(dates)
+    Promise.all(dates)
       .then(
         axios.spread(async (...responses) => {
           const replyArr = [];
@@ -350,13 +368,18 @@ app.message(/this week/i, async ({ message, say }) => {
 
   if (message.text === "this week") {
     const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
     const strToday = returnUTCString(today);
-    const strSunday = returnUTCString(nextSundayDate(today.getDay()));
-    const dates = [];
+    const strSunday = returnUTCString(getNextDateByIndex(today.getUTCDay()));
+
+    let dates = [];
+    const replyArr = [];
+
     // console.log(strToday + "-------" + strSunday);
 
     for (let country in allLeagues) {
+      dates = [];
+
       allLeagues[country].forEach((x) => {
         dates.push(
           axios.get(`https://v3.football.api-sports.io/fixtures`, {
@@ -366,53 +389,51 @@ app.message(/this week/i, async ({ message, say }) => {
               league: x.id,
               from: strToday,
               to: strSunday,
+              timezone: "Europe/Istanbul",
             },
           })
         );
       });
+
+      await Promise.all(dates)
+        .then(
+          axios.spread(async (...responses) => {
+            responses.forEach((x) => {
+              const response = x.data.response;
+              response.sort(sortByDate);
+              if (response.length > 0) {
+                if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
+                  replyArr.push(`\`${response[0].league.country}\`\n`);
+                }
+                replyArr.push(`\• *${response[0].league.name}*\n`);
+                response.forEach((game) => {
+                  if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
+                    replyArr.push(`\`${game.league.country}\`\n`);
+                  }
+                  replyArr.push(
+                    `${convertToDateString(game.fixture.timestamp)}${
+                      game.teams.home.name
+                    } vs ${game.teams.away.name}${
+                      game.goals.home || game.goals.home === 0
+                        ? ` (${game.goals.home}-${game.goals.away})`
+                        : ""
+                    }\n`
+                  );
+                });
+              }
+            });
+          })
+        )
+        .catch(async (errors) => {
+          await say("Something went wrong with the football api.");
+        });
     }
 
-    axios
-      .all(dates)
-      .then(
-        axios.spread(async (...responses) => {
-          const replyArr = [];
-
-          responses.forEach((x) => {
-            const response = x.data.response;
-            response.sort(sortByDate);
-            if (response.length > 0) {
-              if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
-                replyArr.push(`\`${response[0].league.country}\`\n`);
-              }
-              replyArr.push(`\• *${response[0].league.name}*\n`);
-              response.forEach((game) => {
-                if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
-                  replyArr.push(`\`${game.league.country}\`\n`);
-                }
-                replyArr.push(
-                  `${convertToDateString(game.fixture.timestamp)}${
-                    game.teams.home.name
-                  } vs ${game.teams.away.name}${
-                    game.goals.home || game.goals.home === 0
-                      ? ` (${game.goals.home}-${game.goals.away})`
-                      : ""
-                  }\n`
-                );
-              });
-            }
-          });
-
-          if (replyArr.length > 0) {
-            await say(replyArr.join(""));
-          } else {
-            await say("There is no matches on this day.");
-          }
-        })
-      )
-      .catch(async (errors) => {
-        await say("Something went wrong with the football api.");
-      });
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
   } else if (
     arr.length === 3 &&
     allLeagues[arr[0]] &&
@@ -420,9 +441,9 @@ app.message(/this week/i, async ({ message, say }) => {
     arr[2].toLowerCase() === "week"
   ) {
     const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
     const strToday = returnUTCString(today);
-    const strSunday = returnUTCString(nextSundayDate(today.getDay()));
+    const strSunday = returnUTCString(getNextDateByIndex(today.getUTCDay()));
     const dates = [];
     // console.log(strToday + "-------" + strSunday);
 
@@ -435,13 +456,13 @@ app.message(/this week/i, async ({ message, say }) => {
             league: x.id,
             from: strToday,
             to: strSunday,
+            timezone: "Europe/Istanbul",
           },
         })
       );
     });
 
-    axios
-      .all(dates)
+    Promise.all(dates)
       .then(
         axios.spread(async (...responses) => {
           const replyArr = [];
@@ -482,14 +503,23 @@ app.message(/next week/i, async ({ message, say }) => {
   message.text = pipeMessage(message);
   let arr = message.text.split(" ");
   if (message.text === "next week") {
-    const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    let today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    today = getNextDateByIndex(today.getUTCDay(), 1);
     const strToday = returnUTCString(today);
-    const strSunday = returnUTCString(nextSundayDate(today.getDay(), true));
+
+    let sunday = getNextDateByIndex(today.getUTCDay());
+    sunday.setUTCDate(sunday.getUTCDate() + 1 * 7);
+    const strSunday = returnUTCString(sunday);
+
+    let dates = [];
+    const replyArr = [];
+
     // console.log(strToday + "-------" + strSunday);
-    const dates = [];
 
     for (let country in allLeagues) {
+      dates = [];
+
       allLeagues[country].forEach((x) => {
         dates.push(
           axios.get(`https://v3.football.api-sports.io/fixtures`, {
@@ -499,63 +529,66 @@ app.message(/next week/i, async ({ message, say }) => {
               league: x.id,
               from: strToday,
               to: strSunday,
+              timezone: "Europe/Istanbul",
             },
           })
         );
       });
+
+      await Promise.all(dates)
+        .then(
+          axios.spread(async (...responses) => {
+            responses.forEach((x) => {
+              const response = x.data.response;
+              response.sort(sortByDate);
+              if (response.length > 0) {
+                if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
+                  replyArr.push(`\`${response[0].league.country}\`\n`);
+                }
+                replyArr.push(`\• *${response[0].league.name}*\n`);
+                response.forEach((game) => {
+                  if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
+                    replyArr.push(`\`${game.league.country}\`\n`);
+                  }
+                  replyArr.push(
+                    `${convertToDateString(game.fixture.timestamp)}${
+                      game.teams.home.name
+                    } vs ${game.teams.away.name}${
+                      game.goals.home || game.goals.home === 0
+                        ? ` (${game.goals.home}-${game.goals.away})`
+                        : ""
+                    }\n`
+                  );
+                });
+              }
+            });
+          })
+        )
+        .catch(async (errors) => {
+          await say("Something went wrong with the football api.");
+        });
     }
 
-    axios
-      .all(dates)
-      .then(
-        axios.spread(async (...responses) => {
-          const replyArr = [];
-
-          responses.forEach((x) => {
-            const response = x.data.response;
-            response.sort(sortByDate);
-            if (response.length > 0) {
-              if (!replyArr.includes(`\`${response[0].league.country}\`\n`)) {
-                replyArr.push(`\`${response[0].league.country}\`\n`);
-              }
-              replyArr.push(`\• *${response[0].league.name}*\n`);
-              response.forEach((game) => {
-                if (!replyArr.includes(`\`${game.league.country}\`\n`)) {
-                  replyArr.push(`\`${game.league.country}\`\n`);
-                }
-                replyArr.push(
-                  `${convertToDateString(game.fixture.timestamp)}${
-                    game.teams.home.name
-                  } vs ${game.teams.away.name}${
-                    game.goals.home || game.goals.home === 0
-                      ? ` (${game.goals.home}-${game.goals.away})`
-                      : ""
-                  }\n`
-                );
-              });
-            }
-          });
-
-          if (replyArr.length > 0) {
-            await say(replyArr.join(""));
-          } else {
-            await say("There is no matches on this day.");
-          }
-        })
-      )
-      .catch(async (errors) => {
-        await say("Something went wrong with the football api.");
-      });
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
   } else if (
     arr.length === 3 &&
     allLeagues[arr[0]] &&
     arr[1].toLowerCase() === "next" &&
     arr[2].toLowerCase() === "week"
   ) {
-    const today = new Date();
-    today.setHours(new Date().getUTCHours() + utcTime);
+    let today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    today = getNextDateByIndex(today.getUTCDay(), 1);
     const strToday = returnUTCString(today);
-    const strSunday = returnUTCString(nextSundayDate(today.getDay(), true));
+
+    let sunday = getNextDateByIndex(today.getUTCDay());
+    sunday.setUTCDate(sunday.getUTCDate() + 1 * 7);
+    const strSunday = returnUTCString(sunday);
+
     // console.log(strToday + "-------" + strSunday);
     const dates = [];
 
@@ -568,6 +601,7 @@ app.message(/next week/i, async ({ message, say }) => {
             league: x.id,
             from: strToday,
             to: strSunday,
+            timezone: "Europe/Istanbul",
           },
         })
       );
@@ -614,62 +648,12 @@ app.message(/next week/i, async ({ message, say }) => {
 (async () => {
   //   const port = 3000;
   //   await app.start(process.env.PORT || port);
-  // await getLeagues();
   await app.start();
 })();
-
-// function pushLeagueToArr(league, country) {
-//   let leagueToSend = { name: league.name };
-//   let lastSeason = league.season.reduce(
-//     (acc, season) => (acc = acc > season.year ? acc : season),
-//     0
-//   );
-//   leagueToSend.id = lastSeason.id;
-//   leagueToSend.year = lastSeason.year;
-//   allLeagues[country].push(leagueToSend);
-// }
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
-// async function getLeagues() {
-//   return await axios
-//     .get("https://api.football-data-api.com/league-list", {
-//       params: {
-//         key: "ae0234dbf0cc8ad535a97b2bfcbb1fc4d1c9339b79f8567c0d872aa687e06a81",
-//         chosen_leagues_only: "true",
-//       },
-//     })
-//     .then(async function (response) {
-//       if (response.data.data.length > 0) {
-//         response.data.data.forEach((league) => {
-//           league.name = league.name.toLowerCase();
-//           if (league.name.startsWith("germany")) {
-//             pushLeagueToArr(league, "germany");
-//           } else if (league.name.startsWith("turkey")) {
-//             pushLeagueToArr(league, "turkey");
-//           } else if (league.name.startsWith("england")) {
-//             pushLeagueToArr(league, "england");
-//           } else if (league.name.startsWith("spain")) {
-//             pushLeagueToArr(league, "spain");
-//           } else if (league.name.startsWith("netherlands")) {
-//             pushLeagueToArr(league, "netherlands");
-//           } else if (league.name.startsWith("france")) {
-//             pushLeagueToArr(league, "france");
-//           } else if (league.name.startsWith("italy")) {
-//             pushLeagueToArr(league, "italy");
-//           } else if (league.name.startsWith("europe")) {
-//             pushLeagueToArr(league, "europe");
-//           } else if (league.name.startsWith("international")) {
-//             pushLeagueToArr(league, "international");
-//           }
-//         });
-//       } else {
-//         await say("Something is wrong with the API.");
-//       }
-//     });
-// }
 
 function pipeMessage(message) {
   message.text = message.text.toLowerCase();
@@ -709,25 +693,18 @@ function convertToDateString(unixDate) {
   return `*[${formattedDate}* `;
 }
 
-function nextSundayDate(dayIndex, nextWeek = false) {
+function getNextDateByIndex(todayIndex, desiredDayIndex = 0) {
   let today = new Date();
-  today.setHours(new Date().getUTCHours() + utcTime);
-  let daysToAdd = 7;
-  if (dayIndex === 0 && !nextWeek) {
+  today.setUTCHours(new Date().getUTCHours() + utcTime);
+  if (todayIndex === 0) {
     return today;
   }
-  if (dayIndex !== 0 && nextWeek) {
-    daysToAdd = 14;
-  }
-  today.setDate(
-    today.getDate() +
-      ((dayIndex - 1 - today.getDay() + daysToAdd) % daysToAdd) +
-      1
+
+  today.setUTCDate(
+    today.getUTCDate() + ((desiredDayIndex - 1 - today.getUTCDay() + 7) % 7) + 1
   );
   return today;
 }
-
-
 
 function padTo2Digits(num) {
   return num.toString().padStart(2, "0");
