@@ -43,6 +43,15 @@ let allLeagues = {
   international: [
     { name: "World Cup", id: 1 },
     { name: "Euro Championship", id: 4 },
+
+    { name: "World Cup - Qualification Africa", id: 29 },
+    { name: "World Cup - Qualification CONCACAF", id: 31 },
+    { name: "World Cup - Qualification Europe", id: 32 },
+    { name: "World Cup - Qualification Oceania", id: 33 },
+    { name: "World Cup - Qualification South America", id: 34 },
+    { name: "World Cup - Qualification Intercontinental Play-offs", id: 37 },
+    { name: "Africa Cup of Nations", id: 6 },
+    { name: "Africa Cup of Nations - Qualification", id: 36 },
   ],
   europe: [
     { name: "UEFA Champions League", id: 2 },
@@ -51,6 +60,11 @@ let allLeagues = {
     { name: "UEFA Super Cup", id: 531 },
     { name: "UEFA Nations League", id: 5 },
   ],
+
+  argentina: [{ name: "Primera Division", id: 128 }],
+
+  brazil: [{ name: "Serie A", id: 71 }],
+  america: [{ name: "CONMEBOL Libertadores", id: 13 }],
 };
 
 const API_KEY = "d2e3805c4bb5e53b11ac78f290450b9b";
