@@ -68,7 +68,7 @@ let allLeagues = {
 };
 
 const API_KEY = "d2e3805c4bb5e53b11ac78f290450b9b";
-const currentSeason = 2021;
+const currentSeason = 2022;
 const utcTime = 3;
 
 const app = new App({
