@@ -217,7 +217,7 @@ app.message(/leagues/i, async ({ message, say }) => {
   message.text = pipeMessage(message);
   let arr = message.text.split(" ");
 
-  if (arr[0].toLowerCase() === "leagues" && sports[arr[1]?.toLowerCase()]) {
+  if (arr[0].toLowerCase() === "leagues" && sports[arr[1].toLowerCase()]) {
     const replyArr = [];
 
     const sport = arr[1]?.toLowerCase();
