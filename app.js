@@ -141,21 +141,21 @@ function returnCountry(sport, property) {
 
 function returnHomeScore(sport, property) {
   if (sport === "football") {
-    return property?.goals?.home;
+    return property.goals.home;
   } else if (sport === "basketball") {
-    return property?.scores?.home?.total;
+    return property.scores.home.total;
   } else if (sport === "volleyball") {
-    return property?.scores?.home;
+    return property.scores.home;
   }
 }
 
 function returnAwayScore(sport, property) {
   if (sport === "football") {
-    return property.goals?.away;
+    return property.goals.away;
   } else if (sport === "basketball") {
-    return property.scores?.away?.total;
+    return property.scores.away.total;
   } else if (sport === "volleyball") {
-    return property.scores?.away;
+    return property.scores.away;
   }
 }
 
