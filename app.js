@@ -208,7 +208,7 @@ app.message(/sports/i, async ({ message, say }) => {
 
   if (message.text === "sports") {
     await say(
-      `\`Sports\`\n*football*, *basketball*, *volleyball*, *f1*`
+      `\`Sports\`\n• *football*\n• *basketball*\n• *volleyball*\n• *f1*`
     );
   }
 });
@@ -1460,7 +1460,6 @@ function sortByDate(a, b) {
     }
     if (a.timestamp > b.timestamp) {
       return 1;
-      
     }
     return 0;
   }
