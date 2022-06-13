@@ -141,11 +141,11 @@ function returnCountry(sport, property) {
 
 function returnHomeScore(sport, property) {
   if (sport === "football") {
-    return property.goals?.home;
+    return property?.goals?.home;
   } else if (sport === "basketball") {
-    return property.scores?.home?.total;
+    return property?.scores?.home?.total;
   } else if (sport === "volleyball") {
-    return property.scores?.home;
+    return property?.scores?.home;
   }
 }
 
@@ -180,6 +180,7 @@ function returnSeason(sport) {
 }
 
 const API_KEY = "d2e3805c4bb5e53b11ac78f290450b9b";
+// These variables should change every season
 const currentSeason = 2022;
 const basketSeason = "2021-2022";
 const utcTime = 3;
