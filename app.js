@@ -347,7 +347,7 @@ app.message(/today/i, async ({ message, say }) => {
   } else if (
     arr.length === 3 &&
     arr[2].toLowerCase() !== "f1" &&
-    sports[arr[2].toLowerCase()]?.leagueArr[arr[0].toLowerCase()] &&
+    sports[arr[2].toLowerCase()].leagueArr[arr[0].toLowerCase()] &&
     arr[1].toLowerCase() === "today"
   ) {
     const today = new Date();
@@ -357,7 +357,7 @@ app.message(/today/i, async ({ message, say }) => {
 
     const sport = arr[2].toLowerCase();
 
-    sports[arr[2].toLowerCase()]?.leagueArr[arr[0]].forEach((x) => {
+    sports[arr[2].toLowerCase()].leagueArr[arr[0]].forEach((x) => {
       dates.push(
         axios.get(sports[sport].request, {
           headers: { "x-apisports-key": API_KEY },
@@ -519,7 +519,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
   } else if (
     arr.length === 3 &&
     arr[2].toLowerCase() !== "f1" &&
-    sports[arr[2].toLowerCase()]?.leagueArr[arr[0].toLowerCase()] &&
+    sports[arr[2].toLowerCase()].leagueArr[arr[0].toLowerCase()] &&
     arr[1].toLowerCase() === "tomorrow"
   ) {
     const today = new Date();
@@ -532,7 +532,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
 
     const sport = arr[2].toLowerCase();
 
-    sports[arr[2].toLowerCase()]?.leagueArr[arr[0]].forEach((x) => {
+    sports[arr[2].toLowerCase()].leagueArr[arr[0]].forEach((x) => {
       dates.push(
         axios.get(sports[sport].request, {
           headers: { "x-apisports-key": API_KEY },
@@ -745,7 +745,7 @@ app.message(/this week/i, async ({ message, say }) => {
   } else if (
     arr.length === 4 &&
     arr[3].toLowerCase() !== "f1" &&
-    sports[arr[3].toLowerCase()]?.leagueArr[arr[0].toLowerCase()] &&
+    sports[arr[3].toLowerCase()].leagueArr[arr[0].toLowerCase()] &&
     arr[1].toLowerCase() === "this" &&
     arr[2].toLowerCase() === "week"
   ) {
@@ -759,7 +759,7 @@ app.message(/this week/i, async ({ message, say }) => {
     const sport = arr[3].toLowerCase();
 
     if (sport === "football") {
-      sports[arr[3].toLowerCase()]?.leagueArr[arr[0]].forEach((x) => {
+      sports[arr[3].toLowerCase()].leagueArr[arr[0]].forEach((x) => {
         dates.push(
           axios.get(sports[sport].request, {
             headers: { "x-apisports-key": API_KEY },
@@ -779,7 +779,7 @@ app.message(/this week/i, async ({ message, say }) => {
         getNextDateByIndex(today.getUTCDay())
       );
 
-      sports[arr[3].toLowerCase()]?.leagueArr[arr[0]].forEach((x) => {
+      sports[arr[3].toLowerCase()].leagueArr[arr[0]].forEach((x) => {
         eachDay.forEach((day) => {
           dates.push(
             axios.get(sports[sport].request, {
@@ -993,7 +993,7 @@ app.message(/next week/i, async ({ message, say }) => {
   } else if (
     arr.length === 4 &&
     arr[3].toLowerCase() !== "f1" &&
-    sports[arr[3].toLowerCase()]?.leagueArr[arr[0].toLowerCase()] &&
+    sports[arr[3].toLowerCase()].leagueArr[arr[0].toLowerCase()] &&
     arr[1].toLowerCase() === "next" &&
     arr[2].toLowerCase() === "week"
   ) {
@@ -1012,7 +1012,7 @@ app.message(/next week/i, async ({ message, say }) => {
     const sport = arr[3].toLowerCase();
 
     if (sport === "football") {
-      sports[arr[3].toLowerCase()]?.leagueArr[arr[0]].forEach((x) => {
+      sports[arr[3].toLowerCase()].leagueArr[arr[0]].forEach((x) => {
         dates.push(
           axios.get(sports[sport].request, {
             headers: { "x-apisports-key": API_KEY },
@@ -1032,7 +1032,7 @@ app.message(/next week/i, async ({ message, say }) => {
         getNextDateByIndex(today.getUTCDay())
       );
 
-      sports[arr[3].toLowerCase()]?.leagueArr[arr[0]].forEach((x) => {
+      sports[arr[3].toLowerCase()].leagueArr[arr[0]].forEach((x) => {
         eachDay.forEach((day) => {
           dates.push(
             axios.get(sports[sport].request, {
@@ -1248,7 +1248,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
   } else if (
     arr.length === 5 &&
     arr[4].toLowerCase() !== "f1" &&
-    sports[arr[4].toLowerCase()]?.leagueArr[arr[0].toLowerCase()] &&
+    sports[arr[4].toLowerCase()].leagueArr[arr[0].toLowerCase()] &&
     arr[1].toLowerCase() === "next" &&
     arr[2].toLowerCase() === "2" &&
     (arr[3].toLowerCase() === "week" || arr[3].toLowerCase() === "weeks")
@@ -1268,7 +1268,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
     const sport = arr[4].toLowerCase();
 
     if (sport === "football") {
-      sports[sport]?.leagueArr[arr[0]].forEach((x) => {
+      sports[sport].leagueArr[arr[0]].forEach((x) => {
         dates.push(
           axios.get(sports[sport].request, {
             headers: { "x-apisports-key": API_KEY },
@@ -1285,7 +1285,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
     } else {
       const eachDay = getDatesInRange(today, sunday);
 
-      sports[sport]?.leagueArr[arr[0]].forEach((x) => {
+      sports[sport].leagueArr[arr[0]].forEach((x) => {
         eachDay.forEach((day) => {
           dates.push(
             axios.get(sports[sport].request, {
@@ -1446,7 +1446,7 @@ function returnUTCString(date) {
 }
 
 function sortByDate(a, b) {
-  if (a.fixture?.timestamp) {
+  if (a.fixture.timestamp) {
     if (a.fixture.timestamp < b.fixture.timestamp) {
       return -1;
     }
