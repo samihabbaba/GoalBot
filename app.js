@@ -3,6 +3,29 @@ const axios = require("axios");
 
 require("dotenv").config();
 
+let tennisLeagues = {
+  atp: [
+    // { name: "The US Open", id: 560 },
+    // { name: "Australian Open", id: 580 },
+    // { name: "Wimbledon", id: 540 },
+    // { name: "The French Open (Roland Garros)", id: 520 },
+    { name: "USA", id: 560 },
+    { name: "Australia", id: 580 },
+    { name: "Great Britain", id: 540 },
+    { name: "France", id: 520 },
+  ],
+  wtp: [
+    // { name: "The US Open", id: 905 },
+    // { name: "Australian Open", id: 901 },
+    // { name: "Wimbledon", id: 904 },
+    // { name: "The French Open (Roland Garros)", id: 903 },
+    { name: "USA", id: 560 },
+    { name: "Australia", id: 580 },
+    { name: "Great Britain", id: 540 },
+    { name: "France", id: 520 },
+  ],
+};
+
 let footballLeagues = {
   germany: [
     { name: "Bundesliga 1", id: 78 },
@@ -115,6 +138,10 @@ const sports = {
     request: "https://v1.formula-1.api-sports.io/races",
     leagueArr: f1Leagues,
   },
+  // tennis: {
+  //   request: "https://ultimate-tennis1.p.rapidapi.com/tournament_results",
+  //   leagueArr: tennisLeagues,
+  // },
 };
 
 function returnTimestamp(sport, property) {
@@ -179,6 +206,18 @@ function returnSeason(sport) {
   }
 }
 
+function groupBy(objectArray, property, extraMapping = "") {
+  return objectArray.reduce(function (accumulator, obj) {
+    let key = obj[property].code;
+    if (!accumulator[key]) {
+      accumulator[key] = [];
+    }
+    accumulator[key].push(obj);
+    return accumulator;
+  }, {});
+}
+
+const TENNIS_KEY = "192fa27b46mshbea2caa310f3d0fp1b00b2jsn1e8ab00e7b2f";
 const API_KEY = "d2e3805c4bb5e53b11ac78f290450b9b";
 // These variables should change every season
 const currentSeason = 2022;
@@ -198,7 +237,7 @@ app.message(/commands/i, async ({ message, say }) => {
 
   if (message.text === "commands") {
     await say(
-      `\`Commands\`\n*[sports]*: Retrieve available sport's.\n*[leagues]*: Retrieve leagues's.\n*[today]*: Retrieve today's matches.\n*[tomorrow]*: Retrieve tomorrow's matches.\n*[this week]*: Retrieve this week's matches until monday.\n*[next week]*: Retrieve next week's matches until next monday.\n*[next 2 weeks]*: Basically *[this week] + [next week]*.\n _-Don't forget to add name of the sport to the end of the command, ex: *today football*_`
+      `\`Commands\`\n*[sports]*: Retrieve available sport's.\n*[leagues]*: Retrieve leagues's.\n*[today]*: Retrieve today's matches.\n*[tomorrow]*: Retrieve tomorrow's matches.\n*[this week]*: Retrieve this week's matches until monday.\n*[next week]*: Retrieve next week's matches until next monday.\n*[next 2 weeks]*: Basically *[this week] + [next week]*.\n _-You can add a sport name to the end of the command, ex: *today football*_`
     );
   }
 });
@@ -208,7 +247,7 @@ app.message(/sports/i, async ({ message, say }) => {
 
   if (message.text === "sports") {
     await say(
-      `\`Sports\`\n• *football*\n• *basketball*\n• *volleyball*\n• *f1*`
+      `\`Sports\`\n• *football*\n• *basketball*\n• *volleyball*\n• *f1*\n• *tennis*`
     );
   }
 });
@@ -217,10 +256,11 @@ app.message(/leagues/i, async ({ message, say }) => {
   message.text = pipeMessage(message);
   let arr = message.text.split(" ");
 
+  const sport = arr[1]?.toLowerCase();
+
   if (arr[0].toLowerCase() === "leagues" && sports[arr[1]?.toLowerCase()]) {
     const replyArr = [];
 
-    const sport = arr[1]?.toLowerCase();
     // await getLeagues();
     if (sport === "f1") {
       await say("Formula 1 leagues are all Grand Prix available");
@@ -236,8 +276,22 @@ app.message(/leagues/i, async ({ message, say }) => {
       replyArr.push(
         `_-You can combine a league with other commands, ex: *turkey tomorrow ${sport}*_`
       );
+
       await say(replyArr.join(""));
     }
+  } else if (arr[0].toLowerCase() === "leagues" && sport === "tennis") {
+    const replyArr = [];
+
+    replyArr.push(`\`Leagues\`\n`);
+    for (const country in tennisLeagues) {
+      replyArr.push(
+        `*[${capitalizeFirstLetter(country)}]* ${returnLeagueNames(
+          tennisLeagues[country]
+        )}\n`
+      );
+    }
+
+    await say(replyArr.join(""));
   }
 });
 
@@ -338,6 +392,257 @@ app.message(/today/i, async ({ message, say }) => {
           await say("Something went wrong with the football api.");
         });
     }
+
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
+  } else if (message.text === "today") {
+    const today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    const strToday = returnUTCString(today);
+    let dates = [];
+    const replyArr = [];
+
+    for (let sport in sports) {
+      for (let country in sports[sport].leagueArr) {
+        dates = [];
+
+        if (sport === "f1") {
+          dates.push(
+            axios.get(sports[sport].request, {
+              headers: { "x-apisports-key": API_KEY },
+              params: {
+                season: returnSeason(sport),
+                date: strToday,
+                timezone: "Europe/Istanbul",
+              },
+            })
+          );
+        } else {
+          sports[sport].leagueArr[country].forEach((x) => {
+            dates.push(
+              axios.get(sports[sport].request, {
+                headers: { "x-apisports-key": API_KEY },
+                params: {
+                  season: returnSeason(sport),
+                  league: x.id,
+                  date: strToday,
+                  timezone: "Europe/Istanbul",
+                },
+              })
+            );
+          });
+        }
+
+        await Promise.all(dates)
+          .then(
+            axios.spread(async (...responses) => {
+              responses.forEach((x) => {
+                const response = x.data.response;
+                // if (sport === "f1") {
+                //   response.forEach((game) => {
+                //     game.timestamp = returnDateF1(game.date)
+                //   });
+                // }
+                response.sort(sortByDate);
+                if (response.length > 0) {
+                  if (
+                    !replyArr.includes(
+                      `\n\`${returnCountry(
+                        sport,
+                        response[0]
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    )
+                  ) {
+                    replyArr.push(
+                      `\n\`${returnCountry(
+                        sport,
+                        response[0]
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    );
+                  }
+                  replyArr.push(
+                    `\• *${returnLeagueName(sport, response[0])}*\n`
+                  );
+                  response.forEach((game) => {
+                    if (
+                      !replyArr.includes(
+                        `\n\`${returnCountry(
+                          sport,
+                          game
+                        )}\` - *${sport.toUpperCase()}*\n`
+                      )
+                    ) {
+                      replyArr.push(
+                        `\n\`${returnCountry(
+                          sport,
+                          game
+                        )}\` - *${sport.toUpperCase()}*\n`
+                      );
+                    }
+                    if (sport === "f1") {
+                      // game.timestamp = new Date(game.date).getTime();
+                      replyArr.push(
+                        `${returnDateF1(game.date)}${game.circuit.name}\n`
+                      );
+                    } else {
+                      replyArr.push(
+                        `${convertToDateString(returnTimestamp(sport, game))}${
+                          game.teams.home.name
+                        } vs ${game.teams.away.name}${
+                          returnHomeScore(sport, game) ||
+                          returnHomeScore(sport, game) === 0
+                            ? ` (${returnHomeScore(
+                                sport,
+                                game
+                              )}-${returnAwayScore(sport, game)})`
+                            : ""
+                        }\n`
+                      );
+                    }
+                  });
+                }
+              });
+            })
+          )
+          .catch(async (errors) => {
+            await say("Something went wrong with the football api.");
+          });
+      }
+    }
+
+    await axios
+      .get(
+        `https://tennis-live-data.p.rapidapi.com/matches-by-date/${strToday}`,
+        {
+          headers: { "X-RapidAPI-Key": TENNIS_KEY },
+        }
+      )
+      .then((resp) => {
+        let results = resp.data.results;
+
+        results = results.filter(
+          (result) =>
+            result.tournament.country === "USA" ||
+            result.tournament.country === "France" ||
+            result.tournament.country === "Great Britain" ||
+            result.tournament.country === "Australia"
+        );
+
+        results = groupBy(results, `tournament`);
+
+        const ATP = results["ATP"];
+        const WTA = results["WTA"];
+
+        if (ATP?.length > 0) {
+          replyArr.push(`\n\`ATP\` - *${"TENNIS"}*\n`);
+          ATP.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+
+        if (WTA?.length > 0) {
+          replyArr.push(`\n\`WTA\` - *${"TENNIS"}*\n`);
+          WTA.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+      });
+
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
+  } else if (
+    arr[0].toLowerCase() === "today" &&
+    arr[1].toLowerCase() === "tennis"
+  ) {
+    const today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    const strToday = returnUTCString(today);
+    const replyArr = [];
+    // console.log(strToday);
+
+    await axios
+      .get(
+        `https://tennis-live-data.p.rapidapi.com/matches-by-date/${strToday}`,
+        {
+          headers: { "X-RapidAPI-Key": TENNIS_KEY },
+        }
+      )
+      .then((resp) => {
+        let results = resp.data.results;
+
+        results = results.filter(
+          (result) =>
+            result.tournament.country === "USA" ||
+            result.tournament.country === "France" ||
+            result.tournament.country === "Great Britain" ||
+            result.tournament.country === "Australia"
+        );
+
+        results = groupBy(results, `tournament`);
+
+        const ATP = results["ATP"];
+        const WTA = results["WTA"];
+
+        if (ATP?.length > 0) {
+          replyArr.push(`\n\`ATP\`\n`);
+          ATP.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+
+        if (WTA?.length > 0) {
+          replyArr.push(`\n\`WTA\`\n`);
+          WTA.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+      });
 
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
@@ -510,6 +815,261 @@ app.message(/tomorrow/i, async ({ message, say }) => {
           await say("Something went wrong with the football api.");
         });
     }
+
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
+  } else if (message.text === "tomorrow") {
+    const today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    today.setUTCDate(today.getUTCDate() + 1);
+
+    const strToday = returnUTCString(today);
+    let dates = [];
+    const replyArr = [];
+
+    for (let sport in sports) {
+      for (let country in sports[sport].leagueArr) {
+        dates = [];
+
+        if (sport === "f1") {
+          dates.push(
+            axios.get(sports[sport].request, {
+              headers: { "x-apisports-key": API_KEY },
+              params: {
+                season: returnSeason(sport),
+                date: strToday,
+                timezone: "Europe/Istanbul",
+              },
+            })
+          );
+        } else {
+          sports[sport].leagueArr[country].forEach((x) => {
+            dates.push(
+              axios.get(sports[sport].request, {
+                headers: { "x-apisports-key": API_KEY },
+                params: {
+                  season: returnSeason(sport),
+                  league: x.id,
+                  date: strToday,
+                  timezone: "Europe/Istanbul",
+                },
+              })
+            );
+          });
+        }
+
+        await Promise.all(dates)
+          .then(
+            axios.spread(async (...responses) => {
+              responses.forEach((x) => {
+                const response = x.data.response;
+                // if (sport === "f1") {
+                //   response.forEach((game) => {
+                //     game.timestamp = returnDateF1(game.date)
+                //   });
+                // }
+                response.sort(sortByDate);
+                if (response.length > 0) {
+                  if (
+                    !replyArr.includes(
+                      `\n\`${returnCountry(
+                        sport,
+                        response[0]
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    )
+                  ) {
+                    replyArr.push(
+                      `\n\`${returnCountry(
+                        sport,
+                        response[0]
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    );
+                  }
+                  replyArr.push(
+                    `\• *${returnLeagueName(sport, response[0])}*\n`
+                  );
+                  response.forEach((game) => {
+                    if (
+                      !replyArr.includes(
+                        `\n\`${returnCountry(
+                          sport,
+                          game
+                        )}\` - *${sport.toUpperCase()}*\n`
+                      )
+                    ) {
+                      replyArr.push(
+                        `\n\`${returnCountry(
+                          sport,
+                          game
+                        )}\` - *${sport.toUpperCase()}*\n`
+                      );
+                    }
+                    if (sport === "f1") {
+                      // game.timestamp = new Date(game.date).getTime();
+                      replyArr.push(
+                        `${returnDateF1(game.date)}${game.circuit.name}\n`
+                      );
+                    } else {
+                      replyArr.push(
+                        `${convertToDateString(returnTimestamp(sport, game))}${
+                          game.teams.home.name
+                        } vs ${game.teams.away.name}${
+                          returnHomeScore(sport, game) ||
+                          returnHomeScore(sport, game) === 0
+                            ? ` (${returnHomeScore(
+                                sport,
+                                game
+                              )}-${returnAwayScore(sport, game)})`
+                            : ""
+                        }\n`
+                      );
+                    }
+                  });
+                }
+              });
+            })
+          )
+          .catch(async (errors) => {
+            await say("Something went wrong with the football api.");
+          });
+      }
+    }
+
+    await axios
+      .get(
+        `https://tennis-live-data.p.rapidapi.com/matches-by-date/${strToday}`,
+        {
+          headers: { "X-RapidAPI-Key": TENNIS_KEY },
+        }
+      )
+      .then((resp) => {
+        let results = resp.data.results;
+
+        results = results.filter(
+          (result) =>
+            result.tournament.country === "USA" ||
+            result.tournament.country === "France" ||
+            result.tournament.country === "Great Britain" ||
+            result.tournament.country === "Australia"
+        );
+
+        results = groupBy(results, `tournament`);
+
+        const ATP = results["ATP"];
+        const WTA = results["WTA"];
+
+        if (ATP?.length > 0) {
+          replyArr.push(`\n\`ATP\` - *${"TENNIS"}*\n`);
+          ATP.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+
+        if (WTA?.length > 0) {
+          replyArr.push(`\n\`WTA\` - *${"TENNIS"}*\n`);
+          WTA.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+      });
+
+    if (replyArr.length > 0) {
+      await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
+  } else if (
+    arr[0].toLowerCase() === "tomorrow" &&
+    arr[1].toLowerCase() === "tennis"
+  ) {
+    const today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    today.setUTCDate(today.getUTCDate() + 1);
+
+    const strToday = returnUTCString(today);
+    const replyArr = [];
+    console.log(strToday);
+
+    await axios
+      .get(
+        `https://tennis-live-data.p.rapidapi.com/matches-by-date/${strToday}`,
+        {
+          headers: { "X-RapidAPI-Key": TENNIS_KEY },
+        }
+      )
+      .then((resp) => {
+        let results = resp.data.results;
+
+        results = results.filter(
+          (result) =>
+            result.tournament.country === "USA" ||
+            result.tournament.country === "France" ||
+            result.tournament.country === "Great Britain" ||
+            result.tournament.country === "Australia"
+        );
+
+        results = groupBy(results, `tournament`);
+
+        const ATP = results["ATP"];
+        const WTA = results["WTA"];
+
+        if (ATP?.length > 0) {
+          replyArr.push(`\n\`ATP\`\n`);
+          ATP.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+
+        if (WTA?.length > 0) {
+          replyArr.push(`\n\`WTA\`\n`);
+          WTA.forEach((result) => {
+            replyArr.push(`\• *${result.tournament.name}*\n`);
+
+            const matches = result.matches;
+
+            matches.forEach((match) => {
+              replyArr.push(
+                `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                  match.away?.full_name
+                }\n`
+              );
+            });
+          });
+        }
+      });
 
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
@@ -739,6 +1299,111 @@ app.message(/this week/i, async ({ message, say }) => {
 
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
+  } else if (message.text === "this week") {
+  } else if (message.text === "this week tennis") {
+    const today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    // const strToday = returnUTCString(today);
+    // const strSunday = returnUTCString(getNextDateByIndex(today.getUTCDay()));
+
+    let dates = [];
+    const replyArr = [];
+    const replyArr2 = [];
+
+    const eachDay = getDatesInRange(
+      today,
+      getNextDateByIndex(today.getUTCDay())
+    );
+
+    eachDay.forEach((day) => {
+      dates.push(
+        axios.get(
+          `https://tennis-live-data.p.rapidapi.com/matches-by-date/${returnUTCString(
+            day
+          )}`,
+          {
+            headers: { "X-RapidAPI-Key": TENNIS_KEY },
+          }
+        )
+      );
+    });
+
+    await Promise.all(dates)
+      .then(
+        axios.spread(async (...responses) => {
+          responses.forEach((x, i) => {
+            let results = x.data.results;
+
+            results = results.filter(
+              (result) =>
+                result.tournament.country === "USA" ||
+                result.tournament.country === "France" ||
+                result.tournament.country === "Great Britain" ||
+                result.tournament.country === "Australia"
+            );
+
+            results = groupBy(results, `tournament`);
+
+            const ATP = results["ATP"];
+            const WTA = results["WTA"];
+
+            // console.log(ATP)
+
+            if (ATP?.length > 0) {
+              if (i === 0) {
+                replyArr.push(`\n\`ATP\`\n`);
+              }
+
+              ATP.forEach((result) => {
+                if (!replyArr.includes(`\• *${result.tournament.name}*\n`)) {
+                  replyArr.push(`\• *${result.tournament.name}*\n`);
+                }
+
+                const matches = result.matches;
+
+                matches.forEach((match) => {
+                  replyArr.push(
+                    `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                      match.away?.full_name
+                    }\n`
+                  );
+                });
+              });
+            }
+
+            if (WTA?.length > 0) {
+              if (i === 0) {
+                replyArr2.push(`\n\`WTA\`\n`);
+              }
+              WTA.forEach((result) => {
+                if (!replyArr2.includes(`\• *${result.tournament.name}*\n`)) {
+                  replyArr2.push(`\• *${result.tournament.name}*\n`);
+                }
+
+                const matches = result.matches;
+
+                matches.forEach((match) => {
+                  replyArr2.push(
+                    `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                      match.away?.full_name
+                    }\n`
+                  );
+                });
+              });
+            }
+          });
+        })
+      )
+      .catch(async (errors) => {
+        console.log(errors);
+        await say("Something went wrong with the tennis api.");
+      });
+
+    if (replyArr.length > 0) {
+      await say(replyArr.join("") + replyArr2.join(""));
     } else {
       await say("There is no matches on this day.");
     }
@@ -987,6 +1652,112 @@ app.message(/next week/i, async ({ message, say }) => {
 
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
+  } else if (message.text === "next week") {
+  } else if (message.text === "next week tennis") {
+    let today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    today = getNextDateByIndex(today.getUTCDay(), 1);
+
+    let sunday = getNextDateByIndex(today.getUTCDay());
+    sunday.setUTCDate(sunday.getUTCDate() + 1 * 7);
+    // const strToday = returnUTCString(today);
+    // const strSunday = returnUTCString(getNextDateByIndex(today.getUTCDay()));
+
+    let dates = [];
+    const replyArr = [];
+    const replyArr2 = [];
+
+    const eachDay = getDatesInRange(today, sunday);
+
+    eachDay.forEach((day) => {
+      dates.push(
+        axios.get(
+          `https://tennis-live-data.p.rapidapi.com/matches-by-date/${returnUTCString(
+            day
+          )}`,
+          {
+            headers: { "X-RapidAPI-Key": TENNIS_KEY },
+          }
+        )
+      );
+    });
+
+    await Promise.all(dates)
+      .then(
+        axios.spread(async (...responses) => {
+          responses.forEach((x, i) => {
+            let results = x.data.results;
+
+            results = results.filter(
+              (result) =>
+                result.tournament.country === "USA" ||
+                result.tournament.country === "France" ||
+                result.tournament.country === "Great Britain" ||
+                result.tournament.country === "Australia"
+            );
+
+            results = groupBy(results, `tournament`);
+
+            const ATP = results["ATP"];
+            const WTA = results["WTA"];
+
+            // console.log(ATP)
+
+            if (ATP?.length > 0) {
+              if (i === 0) {
+                replyArr.push(`\n\`ATP\`\n`);
+              }
+
+              ATP.forEach((result) => {
+                if (!replyArr.includes(`\• *${result.tournament.name}*\n`)) {
+                  replyArr.push(`\• *${result.tournament.name}*\n`);
+                }
+
+                const matches = result.matches;
+
+                matches.forEach((match) => {
+                  replyArr.push(
+                    `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                      match.away?.full_name
+                    }\n`
+                  );
+                });
+              });
+            }
+
+            if (WTA?.length > 0) {
+              if (i === 0) {
+                replyArr2.push(`\n\`WTA\`\n`);
+              }
+              WTA.forEach((result) => {
+                if (!replyArr2.includes(`\• *${result.tournament.name}*\n`)) {
+                  replyArr2.push(`\• *${result.tournament.name}*\n`);
+                }
+
+                const matches = result.matches;
+
+                matches.forEach((match) => {
+                  replyArr2.push(
+                    `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                      match.away?.full_name
+                    }\n`
+                  );
+                });
+              });
+            }
+          });
+        })
+      )
+      .catch(async (errors) => {
+        console.log(errors);
+        await say("Something went wrong with the tennis api.");
+      });
+
+    if (replyArr.length > 0) {
+      await say(replyArr.join("") + replyArr2.join(""));
     } else {
       await say("There is no matches on this day.");
     }
@@ -1242,6 +2013,118 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
 
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
+    } else {
+      await say("There is no matches on this day.");
+    }
+  } else if (
+    message.text === "next 2 week" ||
+    message.text === "next 2 weeks"
+  ) {
+  } else if (
+    message.text === "next 2 week tennis" ||
+    message.text === "next 2 weeks tennis"
+  ) {
+    let today = new Date();
+    today.setUTCHours(new Date().getUTCHours() + utcTime);
+    // today = getNextDateByIndex(today.getUTCDay(), 1);
+
+    let sunday = getNextDateByIndex(today.getUTCDay());
+    sunday.setUTCDate(sunday.getUTCDate() + 1 * 7);
+    // const strToday = returnUTCString(today);
+    // const strSunday = returnUTCString(getNextDateByIndex(today.getUTCDay()));
+
+    let dates = [];
+    const replyArr = [];
+    const replyArr2 = [];
+
+    const eachDay = getDatesInRange(today, sunday);
+
+    eachDay.forEach((day) => {
+      dates.push(
+        axios.get(
+          `https://tennis-live-data.p.rapidapi.com/matches-by-date/${returnUTCString(
+            day
+          )}`,
+          {
+            headers: { "X-RapidAPI-Key": TENNIS_KEY },
+          }
+        )
+      );
+    });
+
+    await Promise.all(dates)
+      .then(
+        axios.spread(async (...responses) => {
+          responses.forEach((x, i) => {
+            let results = x.data.results;
+
+            results = results.filter(
+              (result) =>
+                result.tournament.country === "USA" ||
+                result.tournament.country === "France" ||
+                result.tournament.country === "Great Britain" ||
+                result.tournament.country === "Australia"
+            );
+
+            results = groupBy(results, `tournament`);
+
+            const ATP = results["ATP"];
+            const WTA = results["WTA"];
+
+            // console.log(ATP)
+
+            if (ATP?.length > 0) {
+              if (i === 0) {
+                replyArr.push(`\n\`ATP\`\n`);
+              }
+
+              ATP.forEach((result) => {
+                if (!replyArr.includes(`\• *${result.tournament.name}*\n`)) {
+                  replyArr.push(`\• *${result.tournament.name}*\n`);
+                }
+
+                const matches = result.matches;
+
+                matches.forEach((match) => {
+                  replyArr.push(
+                    `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                      match.away?.full_name
+                    }\n`
+                  );
+                });
+              });
+            }
+
+            if (WTA?.length > 0) {
+              if (i === 0) {
+                replyArr2.push(`\n\`WTA\`\n`);
+              }
+              WTA.forEach((result) => {
+                if (!replyArr2.includes(`\• *${result.tournament.name}*\n`)) {
+                  replyArr2.push(`\• *${result.tournament.name}*\n`);
+                }
+
+                const matches = result.matches;
+
+                matches.forEach((match) => {
+                  replyArr2.push(
+                    `${returnDateF1(match.date)}${match.home?.full_name} vs ${
+                      match.away?.full_name
+                    }\n`
+                  );
+                });
+              });
+            }
+          });
+        })
+      )
+      .catch(async (errors) => {
+        console.log(errors);
+        await say("Something went wrong with the tennis api.");
+      });
+
+    if (replyArr.length > 0) {
+      await say(replyArr.join("") + replyArr2.join(""));
     } else {
       await say("There is no matches on this day.");
     }
