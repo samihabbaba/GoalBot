@@ -247,7 +247,7 @@ app.message(/sports/i, async ({ message, say }) => {
 
   if (message.text === "sports") {
     await say(
-      `\`Sports\`\n• *football*\n• *basketball*\n• *volleyball*\n• *f1*\n• *tennis*`
+      `\`Sports\`\n• *Football*\n• *Basketball*\n• *Volleyball*\n• *F1*\n• *Tennis*`
     );
   }
 });
@@ -351,17 +351,17 @@ app.message(/today/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\`\n`
+                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\`\n`);
+                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
                 }
                 replyArr.push(`\• *${returnLeagueName(sport, response[0])}*\n`);
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\`\n`)
+                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\`\n`);
+                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
                   }
                   if (sport === "f1") {
                     // game.timestamp = new Date(game.date).getTime();
@@ -396,7 +396,7 @@ app.message(/today/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (message.text === "today") {
     const today = new Date();
@@ -574,7 +574,7 @@ app.message(/today/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     arr[0].toLowerCase() === "today" &&
@@ -610,7 +610,7 @@ app.message(/today/i, async ({ message, say }) => {
         const WTA = results["WTA"];
 
         if (ATP?.length > 0) {
-          replyArr.push(`\n\`ATP\`\n`);
+          replyArr.push(`\n\`ATP\` - *${"TENNIS"}*\n`);
           ATP.forEach((result) => {
             replyArr.push(`\• *${result.tournament.name}*\n`);
 
@@ -627,7 +627,7 @@ app.message(/today/i, async ({ message, say }) => {
         }
 
         if (WTA?.length > 0) {
-          replyArr.push(`\n\`WTA\`\n`);
+          replyArr.push(`\n\`WTA\` - *${"TENNIS"}*\n`);
           WTA.forEach((result) => {
             replyArr.push(`\• *${result.tournament.name}*\n`);
 
@@ -647,7 +647,7 @@ app.message(/today/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     arr.length === 3 &&
@@ -708,7 +708,7 @@ app.message(/today/i, async ({ message, say }) => {
           if (replyArr.length > 0) {
             await say(replyArr.join(""));
           } else {
-            await say("There is no matches on this day.");
+            await say("There is no sporting events on this date(s).");
           }
         })
       )
@@ -773,17 +773,17 @@ app.message(/tomorrow/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\`\n`
+                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\`\n`);
+                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
                 }
                 replyArr.push(`\• *${returnLeagueName(sport, response[0])}*\n`);
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\`\n`)
+                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\`\n`);
+                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
                   }
 
                   if (sport === "f1") {
@@ -819,7 +819,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (message.text === "tomorrow") {
     const today = new Date();
@@ -999,7 +999,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     arr[0].toLowerCase() === "tomorrow" &&
@@ -1037,7 +1037,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
         const WTA = results["WTA"];
 
         if (ATP?.length > 0) {
-          replyArr.push(`\n\`ATP\`\n`);
+          replyArr.push(`\n\`ATP\` - *${"TENNIS"}*\n`);
           ATP.forEach((result) => {
             replyArr.push(`\• *${result.tournament.name}*\n`);
 
@@ -1054,7 +1054,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
         }
 
         if (WTA?.length > 0) {
-          replyArr.push(`\n\`WTA\`\n`);
+          replyArr.push(`\n\`WTA\` - *${"TENNIS"}*\n`);
           WTA.forEach((result) => {
             replyArr.push(`\• *${result.tournament.name}*\n`);
 
@@ -1074,7 +1074,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     arr.length === 3 &&
@@ -1137,7 +1137,7 @@ app.message(/tomorrow/i, async ({ message, say }) => {
           if (replyArr.length > 0) {
             await say(replyArr.join(""));
           } else {
-            await say("There is no matches on this day.");
+            await say("There is no sporting events on this date(s).");
           }
         })
       )
@@ -1245,10 +1245,10 @@ app.message(/this week/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\`\n`
+                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\`\n`);
+                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
                 }
 
                 if (
@@ -1262,9 +1262,9 @@ app.message(/this week/i, async ({ message, say }) => {
                 }
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\`\n`)
+                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\`\n`);
+                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
                   }
 
                   if (sport === "f1") {
@@ -1300,7 +1300,7 @@ app.message(/this week/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (message.text === "this week") {
   } else if (message.text === "this week tennis") {
@@ -1354,7 +1354,7 @@ app.message(/this week/i, async ({ message, say }) => {
 
             if (ATP?.length > 0) {
               if (i === 0) {
-                replyArr.push(`\n\`ATP\`\n`);
+                replyArr.push(`\n\`ATP\` - *${"TENNIS"}*\n`);
               }
 
               ATP.forEach((result) => {
@@ -1376,7 +1376,7 @@ app.message(/this week/i, async ({ message, say }) => {
 
             if (WTA?.length > 0) {
               if (i === 0) {
-                replyArr2.push(`\n\`WTA\`\n`);
+                replyArr2.push(`\n\`WTA\` - *${"TENNIS"}*\n`);
               }
               WTA.forEach((result) => {
                 if (!replyArr2.includes(`\• *${result.tournament.name}*\n`)) {
@@ -1405,7 +1405,7 @@ app.message(/this week/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join("") + replyArr2.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     arr.length === 4 &&
@@ -1498,7 +1498,7 @@ app.message(/this week/i, async ({ message, say }) => {
           if (replyArr.length > 0) {
             await say(replyArr.join(""));
           } else {
-            await say("There is no matches on this day.");
+            await say("There is no sporting events on this date(s).");
           }
         })
       )
@@ -1597,10 +1597,10 @@ app.message(/next week/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\`\n`
+                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\`\n`);
+                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
                 }
 
                 if (
@@ -1615,9 +1615,9 @@ app.message(/next week/i, async ({ message, say }) => {
 
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\`\n`)
+                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\`\n`);
+                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
                   }
 
                   if (sport === "f1") {
@@ -1653,7 +1653,7 @@ app.message(/next week/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (message.text === "next week") {
   } else if (message.text === "next week tennis") {
@@ -1708,7 +1708,7 @@ app.message(/next week/i, async ({ message, say }) => {
 
             if (ATP?.length > 0) {
               if (i === 0) {
-                replyArr.push(`\n\`ATP\`\n`);
+                replyArr.push(`\n\`ATP\` - *${"TENNIS"}*\n`);
               }
 
               ATP.forEach((result) => {
@@ -1730,7 +1730,7 @@ app.message(/next week/i, async ({ message, say }) => {
 
             if (WTA?.length > 0) {
               if (i === 0) {
-                replyArr2.push(`\n\`WTA\`\n`);
+                replyArr2.push(`\n\`WTA\` - *${"TENNIS"}*\n`);
               }
               WTA.forEach((result) => {
                 if (!replyArr2.includes(`\• *${result.tournament.name}*\n`)) {
@@ -1759,7 +1759,7 @@ app.message(/next week/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join("") + replyArr2.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     arr.length === 4 &&
@@ -1858,7 +1858,7 @@ app.message(/next week/i, async ({ message, say }) => {
           if (replyArr.length > 0) {
             await say(replyArr.join(""));
           } else {
-            await say("There is no matches on this day.");
+            await say("There is no sporting events on this date(s).");
           }
         })
       )
@@ -1957,10 +1957,10 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\`\n`
+                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\`\n`);
+                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
                 }
 
                 if (
@@ -1975,9 +1975,9 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
 
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\`\n`)
+                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\`\n`);
+                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
                   }
 
                   if (sport === "f1") {
@@ -2014,7 +2014,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     message.text === "next 2 week" ||
@@ -2075,7 +2075,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
 
             if (ATP?.length > 0) {
               if (i === 0) {
-                replyArr.push(`\n\`ATP\`\n`);
+                replyArr.push(`\n\`ATP\` - *${"TENNIS"}*\n`);
               }
 
               ATP.forEach((result) => {
@@ -2097,7 +2097,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
 
             if (WTA?.length > 0) {
               if (i === 0) {
-                replyArr2.push(`\n\`WTA\`\n`);
+                replyArr2.push(`\n\`WTA\` - *${"TENNIS"}*\n`);
               }
               WTA.forEach((result) => {
                 if (!replyArr2.includes(`\• *${result.tournament.name}*\n`)) {
@@ -2126,7 +2126,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
     if (replyArr.length > 0) {
       await say(replyArr.join("") + replyArr2.join(""));
     } else {
-      await say("There is no matches on this day.");
+      await say("There is no sporting events on this date(s).");
     }
   } else if (
     arr.length === 5 &&
@@ -2224,7 +2224,7 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
           if (replyArr.length > 0) {
             await say(replyArr.join(""));
           } else {
-            await say("There is no matches on this day.");
+            await say("There is no sporting events on this date(s).");
           }
         })
       )
