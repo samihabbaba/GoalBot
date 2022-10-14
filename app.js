@@ -67,7 +67,6 @@ let footballLeagues = {
     { name: "World Cup", id: 1 },
     { name: "Euro Championship", id: 4 },
     { name: "UEFA Nations League", id: 5 },
-
     { name: "World Cup - Qualification Africa", id: 29 },
     { name: "World Cup - Qualification CONCACAF", id: 31 },
     { name: "World Cup - Qualification Europe", id: 32 },
@@ -96,7 +95,10 @@ let basketLeagues = {
     { name: "TBL", id: 102 },
     { name: "Turkish Cup", id: 166 },
   ],
-  europe: [{ name: "Euroleague", id: 120 }, { name: "Eurocup", id: 194 }, ,],
+  europe: [
+    { name: "Euroleague", id: 120 },
+    { name: "Eurocup", id: 194 },
+  ],
 };
 
 let volleyLeagues = {
@@ -199,11 +201,12 @@ function returnLeagueName(sport, property) {
 }
 
 function returnSeason(sport) {
-  if (sport === "basketball") {
-    return basketSeason;
-  } else {
-    return currentSeason;
-  }
+  return currentSeason;
+  // if (sport === "basketball") {
+  //   return basketSeason;
+  // } else {
+  //   return currentSeason;
+  // }
 }
 
 function groupBy(objectArray, property, extraMapping = "") {
@@ -351,17 +354,35 @@ app.message(/today/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
+                  replyArr.push(
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
+                  );
                 }
                 replyArr.push(`\• *${returnLeagueName(sport, response[0])}*\n`);
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
+                    !replyArr.includes(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    )
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
+                    replyArr.push(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    );
                   }
                   if (sport === "f1") {
                     // game.timestamp = new Date(game.date).getTime();
@@ -773,17 +794,35 @@ app.message(/tomorrow/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
+                  replyArr.push(
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
+                  );
                 }
                 replyArr.push(`\• *${returnLeagueName(sport, response[0])}*\n`);
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
+                    !replyArr.includes(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    )
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
+                    replyArr.push(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    );
                   }
 
                   if (sport === "f1") {
@@ -1245,10 +1284,18 @@ app.message(/this week/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
+                  replyArr.push(
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
+                  );
                 }
 
                 if (
@@ -1262,9 +1309,19 @@ app.message(/this week/i, async ({ message, say }) => {
                 }
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
+                    !replyArr.includes(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    )
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
+                    replyArr.push(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    );
                   }
 
                   if (sport === "f1") {
@@ -1597,10 +1654,18 @@ app.message(/next week/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
+                  replyArr.push(
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
+                  );
                 }
 
                 if (
@@ -1615,9 +1680,19 @@ app.message(/next week/i, async ({ message, say }) => {
 
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
+                    !replyArr.includes(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    )
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
+                    replyArr.push(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    );
                   }
 
                   if (sport === "f1") {
@@ -1957,10 +2032,18 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
               if (response.length > 0) {
                 if (
                   !replyArr.includes(
-                    `\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
                   )
                 ) {
-                  replyArr.push(`\n\`${returnCountry(sport, response[0])}\` - *${sport.toUpperCase()}*\n`);
+                  replyArr.push(
+                    `\n\`${returnCountry(
+                      sport,
+                      response[0]
+                    )}\` - *${sport.toUpperCase()}*\n`
+                  );
                 }
 
                 if (
@@ -1975,9 +2058,19 @@ app.message(/next 2 weeks|next 2 week/i, async ({ message, say }) => {
 
                 response.forEach((game) => {
                   if (
-                    !replyArr.includes(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`)
+                    !replyArr.includes(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    )
                   ) {
-                    replyArr.push(`\n\`${returnCountry(sport, game)}\` - *${sport.toUpperCase()}*\n`);
+                    replyArr.push(
+                      `\n\`${returnCountry(
+                        sport,
+                        game
+                      )}\` - *${sport.toUpperCase()}*\n`
+                    );
                   }
 
                   if (sport === "f1") {
